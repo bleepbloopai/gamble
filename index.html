@@ -359,7 +359,7 @@ function deal() {
   if (innerWidth <= 860) $('#table').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
 }
 
-function openCard(i) {
+function openCard(i, quiet) {
   const b = state.batch[i];
   if (!b || b.o) return;
   b.o = true;
@@ -367,7 +367,7 @@ function openCard(i) {
   if (b.p) { state.won += b.p; state.bal += b.p; state.big = Math.max(state.big, b.p); }
   save();
   const el = grid.children[i], t = tier(b.p);
-  play(CFG.CARD_OPEN);
+  if (!quiet) play(CFG.CARD_OPEN);
   el.classList.add('open', b.p ? 'win' : 'lose');
   if (b.p) el.dataset.t = t;
   el.setAttribute('aria-label', 'Card ' + (i + 1) + ', ' + (b.p ? fmt(b.p) + ' win' : 'no win'));
@@ -379,7 +379,8 @@ function revealAll() {
   clearReveal();
   const left = state.batch.map((b, i) => b.o ? -1 : i).filter(i => i >= 0);
   const step = REDUCED ? 0 : Math.max(25, Math.min(90, 2400 / left.length));
-  left.forEach((i, k) => revealT.push(setTimeout(() => openCard(i), k * step)));
+  if (left.length) play(CFG.CARD_OPEN);                 // one open sound for the whole reveal
+  left.forEach((i, k) => revealT.push(setTimeout(() => openCard(i, true), k * step)));
 }
 function clearReveal() { revealT.forEach(clearTimeout); revealT = []; }
 
